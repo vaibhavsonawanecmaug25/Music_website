@@ -1,12 +1,13 @@
 package com.music.service;
 import java.util.List;
 
-import com.music.model.UserFavourite;
+import com.music.dto.FavouritesongDto;
+
 
 public interface UserFavouriteService {
-List<UserFavourite> getFavouritesbyUserID(Long userId);
+List<FavouritesongDto> getFavouritesbyUserID(Long userId);
 String addtoFavourites(Long userId,Long songId);
-String removeFavourites(Long favId);
+String removeFavourites(Long favId, Long songId);
 boolean isSongFavourite(Long userId,Long songId);
 
 

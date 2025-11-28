@@ -1,113 +1,70 @@
 package com.music.controller;
 
-import com.music.model.UserFavourite;
-import com.music.model.User;
-import com.music.model.Song;
-import com.music.repository.UserFavouriteRepository;
-import com.music.repository.UserRepository;
-import com.music.repository.SongRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
-@Controller
-@RequestMapping("/favourites")   // Base URL like /favourites/*
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.music.dto.FavouritesongDto;
+import com.music.model.UserFavourite;
+import com.music.service.UserFavouriteService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@RestController
+@RequestMapping("/favourites")
+@Tag(name = "Favourite Songs API", description = "Operations for managing user's favourite songs")
 public class UserFavouriteController {
 
     @Autowired
-    private UserFavouriteRepository favouriteRepo;
-
-    @Autowired
-    private UserRepository userRepo;
-
-    @Autowired
-    private SongRepository songRepo;
+    private UserFavouriteService favService;
 
     public UserFavouriteController() {
         System.out.println("in ctor of " + getClass());
     }
 
-    
-     // ALL FAVOURITE SONGS by id
-    // URL: /favourites/list?userId=1
-    // VIEW : /WEB-INF/views/favourites/list.jsp
-
-    @GetMapping("/list")
-    public String listUserFavourites(@RequestParam Long userId, Model model) {
-
-        System.out.println("Fetching favourites for user: " + userId);
-
-        List<UserFavourite> favList = favouriteRepo.findByUserUserId(userId);
-
-        model.addAttribute("fav_list", favList);
-        model.addAttribute("userId", userId);
-
-        return "favourites/list"; // JSP page
+    // ---------------------------------------------------------
+    // Get all favourites of a user
+    // URL: GET http://localhost:8080/favourites/user/1
+    // ---------------------------------------------------------
+    @Operation(summary = "Get favourite songs of a user")
+    @GetMapping("/user/{userId}")
+    public List<FavouritesongDto> getUserFavourites(@PathVariable Long userId) {
+        System.out.println("Get favourites for user: " + userId);
+        return favService.getFavouritesbyUserID(userId);
     }
 
-    // --------------------------------------------------------------------
-    // SHOW ADD FAVOURITE FORM
-    // URL → /favourites/add?userId=1
-    // VIEW → favourites/add.jsp
-    // --------------------------------------------------------------------
-    @GetMapping("/add")
-    public String showAddFavouriteForm(@RequestParam Long userId, Model model) {
 
-        model.addAttribute("songs", songRepo.findAll());
-        model.addAttribute("userId", userId);
-
-        return "favourites/add";
-    }
-
-    // --------------------------------------------------------------------
-    //ADD FAVOURITE FORM SUBMISSION
-    // URL : /favourites/add  (POST)
+    // Add song to favourites
+    // url: POST http://localhost:8080/favourites/add?userId=1&songId=10
     
+    @Operation(summary = "Add a song to user's favourites")
     @PostMapping("/add")
-    public String addFavourite(@RequestParam Long userId,
-                               @RequestParam Long songId,
-                               Model model) {
-
-        boolean exists = favouriteRepo.existsByUserUserIdAndSongSongId(userId, songId);
-
-        if (exists) {
-            model.addAttribute("message", "Song already in favourites!");
-            return "redirect:/favourites/list?userId=" + userId;
-        }
-
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Song song = songRepo.findById(songId)
-                .orElseThrow(() -> new RuntimeException("Song not found"));
-
-        UserFavourite fav = UserFavourite.builder()
-                .user(user)
-                .song(song)
-                .build();
-
-        favouriteRepo.save(fav);
-
-        return "redirect:/favourites/list?userId=" + userId;
+    public String addFavourite(@RequestParam Long userId, @RequestParam Long songId) {
+        System.out.println("Add favourite: user=" + userId + ", song=" + songId);
+        return favService.addtoFavourites(userId, songId);
     }
 
     
-    // delete from favopurites
-    @GetMapping("/remove")
-    public String removeFavourite(@RequestParam Long userId,
-                                  @RequestParam Long songId,
-                                  Model model) {
+    // Remove song from favourites
+    // url: http://localhost:8080/favourites/remove?userId=1&songId=10
+    
+    @Operation(summary = "Remove a song from user's favourites")
+    @DeleteMapping("/remove")
+    public String removeFavourite(@RequestParam Long userId, @RequestParam Long songId) {
+        System.out.println("Remove favourite: user=" + userId + ", song=" + songId);
+        return favService.removeFavourites(userId, songId);
+    }
 
-        List<UserFavourite> list = favouriteRepo.findByUserUserIdAndSongSongId(userId, songId);
-
-        if (!list.isEmpty()) {
-            favouriteRepo.deleteAll(list);
-        }
-
-        return "redirect:/favourites/list?userId=" + userId;
+    //
+    //if song is in favourites
+    // url: GET http://localhost:8080/favourites/check?userId=1&songId=10
+    
+    @Operation(summary = "Check if a song is already in favourites")
+    @GetMapping("/check")
+    public boolean isFavourite(@RequestParam Long userId, @RequestParam Long songId) {
+        System.out.println("Check favourite: user=" + userId + ", song=" + songId);
+        return favService.isSongFavourite(userId, songId);
     }
 }
