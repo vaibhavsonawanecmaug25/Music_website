@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.music.dto.SongalbumDto;
 import com.music.model.Song;
 import com.music.repository.SongRepository;
@@ -26,7 +28,7 @@ private SongRepository songRepo;
 		return "Song saved Sucessfully...";
 	}
 				
-	
+	//getsong by album
 	@Override
 	public List<SongalbumDto> getSongsByAlbumId(Long albumId) {
          List<Song> songs=songRepo.findByAlbumAlbumId(albumId);
@@ -34,8 +36,12 @@ private SongRepository songRepo;
         		 .map(s ->new SongalbumDto(
         			s.getSongId(),
         			s.getTitle(),
-        			s.getArtist().getName())).toList();
+        			s.getArtist().getName(),
+        			s.getGenre(),
+        			s.getDuration(),
+        			s.getAudioUrl())).toList();
 	}
+	//getsong by artist
 	@Override
 	public List<SongalbumDto> getSongsByArtistId(Long artistId) {
 		// TODO Auto-generated method stub
@@ -44,7 +50,10 @@ private SongRepository songRepo;
 				.map(s ->new SongalbumDto(
 						s.getSongId(),
 						s.getTitle(),
-						s.getArtist().getName())).toList();
+						s.getArtist().getName(),
+						s.getGenre(),
+						s.getDuration(),
+						s.getAudioUrl())).toList();
 	}
 	
 	//delete song
@@ -57,8 +66,29 @@ private SongRepository songRepo;
 
 	        return "Song deleted successfully...";
 	}
+	//get song by id
+	@Override
+	public SongalbumDto getSongById(Long id) {
+		// TODO Auto-generated method stub
+		return songRepo.findById(id)
+				.stream().map(s -> new SongalbumDto(
+						s.getSongId(),
+						s.getTitle(),
+						
+						s.getArtist().getName(),
+						s.getGenre(),
+						s.getDuration(),
+						s.getAudioUrl()))
+				       .findFirst()
+				
+				.orElseThrow(() -> new RuntimeException("Song not found"));
+	}
 	
-}
+	
+	}
+	
+	
+
 	
 
     

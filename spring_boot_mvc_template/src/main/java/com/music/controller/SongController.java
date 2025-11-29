@@ -66,6 +66,10 @@ public SongController() {
     public String deleteSong(@PathVariable Long songId) {
         return songService.deleteSong(songId);
     }
+    @GetMapping("/{id}")
+    public SongalbumDto getSongById(@PathVariable Long id) {
+
+        return songService.getSongById(id);
 
 
 
@@ -77,4 +81,5 @@ public SongController() {
 	
 	
 
+}
 }

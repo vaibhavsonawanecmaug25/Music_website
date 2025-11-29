@@ -8,6 +8,9 @@ public class SongalbumDto {
 	private Long songId;
 	private String name;
 	private String artist_name;
+	private String genre;
+	private Integer duration;
+	private String audioUrl;
 	
 	
 

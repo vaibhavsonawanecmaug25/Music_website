@@ -25,9 +25,9 @@ public class Song {
     private String genre;
 
     private Integer duration; // seconds
+    @Column(name = "audio_url", length = 500, nullable = false)
+    private String audioUrl;
 
-    @Column(name = "file_path", length = 255, nullable = false)
-    private String filePath;
 
     private LocalDateTime uploadedAt;
 
