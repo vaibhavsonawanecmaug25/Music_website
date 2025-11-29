@@ -83,6 +83,13 @@ private SongRepository songRepo;
 				
 				.orElseThrow(() -> new RuntimeException("Song not found"));
 	}
+	@Override
+	public Song getSongEntityById(Long songId) {
+	    return songRepo.findById(songId)
+		        .orElseThrow(() -> new RuntimeException("Song not found"));
+
+	}
+	
 	
 	
 	}

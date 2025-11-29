@@ -11,5 +11,6 @@ public interface UserService {
     UserDto addUser(SignupRequest signupRequest);
 
     void deleteUser(Long id);
+    User getUserEntityById(Long id);
     UserDto getUserById(Long id);
 }

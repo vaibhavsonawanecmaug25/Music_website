@@ -15,6 +15,7 @@ public interface SongService {
     List<SongalbumDto> getSongsByArtistId(Long artistId);
     String deleteSong(Long songId);
     SongalbumDto getSongById(Long id);
+	Song getSongEntityById(Long songId);
     
 
 

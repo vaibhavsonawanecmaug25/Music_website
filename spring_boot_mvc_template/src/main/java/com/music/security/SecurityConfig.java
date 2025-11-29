@@ -7,7 +7,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,41 +17,51 @@ public class SecurityConfig {
 
     @Autowired
     private JwtFilter jwtFilter;
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Bean
-    public AuthenticationManager authenticationManagerBean(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
-    }
-
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> {}) // enable cors
+            .cors(cors -> {}) 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/api/users").permitAll()
-                .anyRequest().authenticated()
-            )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                    // ⭐ COMPLETE SWAGGER SUPPORT ⭐
+                    .requestMatchers(
+                            "/v3/api-docs/**",
+                            "/swagger-ui/**",
+                            "/swagger-ui.html"
+                    ).permitAll()
 
+                    //  PUBLIC ENDPOINTS 
+                    .requestMatchers(
+                            "/auth/**",
+                            "/api/users",
+                            "/songs/**",
+                            "/artists/**",
+                            "/albums/**",
+                            "/api/history/**" 
+                    ).permitAll()
+
+                    // EVERYTHING ELSE IS SECURED 
+                    .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> 
+                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            );
+
+        // Add JWT filter
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authManager(AuthenticationConfiguration config)
-            throws Exception {
+    public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }
