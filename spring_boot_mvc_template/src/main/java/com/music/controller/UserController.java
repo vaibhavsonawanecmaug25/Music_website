@@ -1,14 +1,15 @@
 
 	package com.music.controller;
 
-	import com.music.dto.UserDto;
+	import com.music.dto.SignupRequest;
+import com.music.dto.UserDto;
  import com.music.model.User;
 	import com.music.service.UserService;
 	import org.springframework.beans.factory.annotation.Autowired;
 	import org.springframework.web.bind.annotation.*;
 
 	import java.util.List;
-
+	@CrossOrigin(origins = "http://localhost:5173")
 	@RestController
 	@RequestMapping("/api/users")
    public class UserController{
@@ -29,11 +30,20 @@
 	    }
 
 	    @PostMapping
-	    public UserDto saveUser(@RequestBody UserDto dto) {
-	        return userService.addUser(dto);
+	    public UserDto saveUser(@RequestBody SignupRequest signupReq) {
+	        return userService.addUser(signupReq);
 	    }
 
+	    // DELETE USER
+	    @DeleteMapping("/{id}")
+	    public String deleteUser(@PathVariable Long id) {
+	        userService.deleteUser(id);
+	        return "User deleted successfully";
 	    }
+	    }
+
+
+	    
 	
 
 

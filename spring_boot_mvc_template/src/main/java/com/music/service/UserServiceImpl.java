@@ -1,10 +1,14 @@
 package com.music.service;
 
 import java.util.List;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.music.dto.SignupRequest;
 import com.music.dto.UserDto;
 import com.music.model.User;
 import com.music.model.User_role;
@@ -15,6 +19,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     // Convert Entity -> DTO
     private UserDto toDto(User u) {
@@ -27,20 +34,15 @@ public class UserServiceImpl implements UserService {
     }
 
     // Convert DTO -> Entity
-    private User toEntity(UserDto dto) {
+    private User toEntity(SignupRequest dto)
+ {
         User u = new User();
         u.setName(dto.getName());
         u.setEmail(dto.getEmail());
-        u.setPassword(dto.getPassword()); // you will hash later
-        if (dto.getRole() == null || dto.getRole().isEmpty()) {
-            u.setRole(User_role.USER);   // DEFAULT ROLE
-        } else {
-            try {
-                u.setRole(User_role.valueOf(dto.getRole().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                u.setRole(User_role.USER); // If invalid → default USER
-            }
-        }
+        u.setPassword(passwordEncoder.encode(dto.getPassword())); //hash password
+        u.setRole(User_role.USER);
+
+        
 
         return u;
     }
@@ -54,15 +56,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto addUser(UserDto userDto) {
-        User saved = userRepository.save(toEntity(userDto));
+    public UserDto addUser(SignupRequest signupreq) {
+        User saved = userRepository.save(toEntity(signupreq));
         return toDto(saved);
     }
 
     @Override
+    
     public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("User not found with id: " + id);
+        }
         userRepository.deleteById(id);
     }
+
 
     @Override
     public UserDto getUserById(Long id) {
