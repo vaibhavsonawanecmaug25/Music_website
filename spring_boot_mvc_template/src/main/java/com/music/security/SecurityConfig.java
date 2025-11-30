@@ -18,42 +18,50 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> {}) 
+            .cors(cors -> {})
             .authorizeHttpRequests(auth -> auth
-                    // ⭐ COMPLETE SWAGGER SUPPORT ⭐
+                    // ⭐ SWAGGER SUPPORT
                     .requestMatchers(
                             "/v3/api-docs/**",
                             "/swagger-ui/**",
                             "/swagger-ui.html"
                     ).permitAll()
 
-                    //  PUBLIC ENDPOINTS 
+                    // ⭐ PUBLIC API ENDPOINTS
                     .requestMatchers(
-                            "/auth/**",
-                            "/api/users",
-                            "/songs/**",
-                            "/artists/**",
-                            "/albums/**",
-                            "/api/history/**" 
-                    ).permitAll()
+                    	    "/api/users",
+                    	    "/api/users/**",
+                    	    "/users",
+                    	    "/users/**",
+                    	    "/auth/**",
+                    	    "/songs/**",
+                    	    "/api/songs/**",
+                    	    "/artists/**",
+                    	    "/albums/**",
+                    	    "/api/history/**"
+                    	).permitAll()
 
-                    // EVERYTHING ELSE IS SECURED 
+
+
+
+                    // ⭐ ANYTHING ELSE NEEDS JWT
                     .anyRequest().authenticated()
             )
-            .sessionManagement(session -> 
+            .sessionManagement(session ->
                     session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             );
 
-        // Add JWT filter
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder encoder() {

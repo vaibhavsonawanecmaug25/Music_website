@@ -18,7 +18,8 @@ public class JwtTokenProvider {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    private final long EXPIRATION = 1000 * 60 * 60 * 10; // 10 hours
+    private final long EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 days
+ 
 
     // Convert secret string -> strong key
     private Key getSigningKey() {
